@@ -11,6 +11,10 @@ public class Rocket : MonoBehaviour
 //These values are the base values. Can be changed in Unity
    [SerializeField] float rcsThrust = 100f;
    [SerializeField] float mainThrust = 100f;
+   [SerializeField] float levelLoadDelay = 2f;
+
+    bool isTransitioning = false;
+    bool collisionsDisabled = false;
     void Start()
     {
         rigidBody = GetComponent<Rigidbody>(); 
@@ -19,8 +23,12 @@ public class Rocket : MonoBehaviour
     
     void Update()
     {
+        if (!isTransitioning)
+        {
         RespondToRotateInput();
         RespondToThrustInput();
+        }
+
     }
 
     private void RespondToRotateInput()
@@ -64,5 +72,34 @@ public class Rocket : MonoBehaviour
         rigidBody.AddRelativeForce(Vector3.up * thrustThisFrame);
 
         //Will tell audio/particle effects to start here if given enough time
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (isTransitioning || collisionsDisabled)
+        {
+            //ignores collisions when dead
+            return;
+        }
+
+        switch (collision.gameObject.tag)
+        {
+            case "Friendly":
+                break;
+            case "Death":
+                StartDeathSequence();
+                break;
+        }
+    }
+
+    private void StartDeathSequence()
+    {
+        isTransitioning = true;
+        Invoke("LoadFirstLevel" , levelLoadDelay);
+    }
+
+    private void LoadFirstLevel()
+    {
+        SceneManager.LoadScene(0);
     }
 }
