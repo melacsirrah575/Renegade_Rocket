@@ -89,17 +89,33 @@ public class Rocket : MonoBehaviour
             case "Death":
                 StartDeathSequence();
                 break;
+            case "End":
+                StartEndSequence();
+                break;
         }
     }
 
     private void StartDeathSequence()
     {
+        // todo stop effects from happening
         isTransitioning = true;
         Invoke("LoadFirstLevel" , levelLoadDelay);
+    }
+
+    private void StartEndSequence()
+    {
+        // todo add effects for ending level
+        isTransitioning = true;
+        Invoke("LoadNextLevel" , levelLoadDelay);
     }
 
     private void LoadFirstLevel()
     {
         SceneManager.LoadScene(0);
+    }
+
+    private void LoadNextLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
 }
