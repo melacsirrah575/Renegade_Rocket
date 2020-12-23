@@ -15,6 +15,11 @@ public class Rocket : MonoBehaviour
    [SerializeField] AudioClip dying;
    [SerializeField] AudioClip endLevel;
 
+   [SerializeField] ParticleSystem mainEngineParticles;
+      [SerializeField] ParticleSystem deathParticles;
+   [SerializeField] ParticleSystem successParticles;
+
+
     bool isTransitioning = false;
     bool collisionsDisabled = false;
     void Start()
@@ -68,6 +73,7 @@ public class Rocket : MonoBehaviour
     private void StopApplyingThrust()
     {
         audioSource.Stop();
+        mainEngineParticles.Stop();
     }
 
     private void ApplyThrust(float thrustThisFrame)
@@ -77,7 +83,10 @@ public class Rocket : MonoBehaviour
         {
             audioSource.PlayOneShot(mainEngine);
         }
-
+        if (!mainEngineParticles.isPlaying)
+        {
+            mainEngineParticles.Play();
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -107,7 +116,10 @@ public class Rocket : MonoBehaviour
         isTransitioning = true;
         audioSource.Stop();
         audioSource.PlayOneShot(dying);
+        mainEngineParticles.Stop();
+        deathParticles.Play();
         Invoke("LoadFirstLevel" , levelLoadDelay);
+
     }
 
     private void StartEndSequence()
@@ -116,6 +128,8 @@ public class Rocket : MonoBehaviour
         audioSource.Stop();
         audioSource.PlayOneShot(endLevel);
         isTransitioning = true;
+        mainEngineParticles.Stop();
+        successParticles.Play();
         Invoke("LoadNextLevel" , levelLoadDelay);
     }
 
