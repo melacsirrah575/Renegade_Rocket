@@ -2,8 +2,9 @@
 
 public class DestroyObject : MonoBehaviour
 {
-void DestroyObjectDelayed()
-{
-    
-}
+    void Start ()
+    {
+       Destroy(gameObject, 5);
+
+    }
 }
