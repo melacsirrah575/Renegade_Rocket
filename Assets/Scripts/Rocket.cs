@@ -4,17 +4,23 @@ using UnityEngine.SceneManagement;
 public class Rocket : MonoBehaviour
 {
    Rigidbody rigidBody;
+   AudioSource audioSource;
 
 //These values are the base values. Can be changed in Unity
    [SerializeField] float rcsThrust = 100f;
    [SerializeField] float mainThrust = 100f;
    [SerializeField] float levelLoadDelay = 2f;
 
+   [SerializeField] AudioClip mainEngine;
+   [SerializeField] AudioClip dying;
+   [SerializeField] AudioClip endLevel;
+
     bool isTransitioning = false;
     bool collisionsDisabled = false;
     void Start()
     {
         rigidBody = GetComponent<Rigidbody>(); 
+        audioSource = GetComponent<AudioSource>();
     }
 
     
@@ -61,14 +67,17 @@ public class Rocket : MonoBehaviour
 
     private void StopApplyingThrust()
     {
-        //This is where audio and particle effects would be told to stop
+        audioSource.Stop();
     }
 
     private void ApplyThrust(float thrustThisFrame)
     {
         rigidBody.AddRelativeForce(Vector3.up * thrustThisFrame);
+        if (!audioSource.isPlaying)
+        {
+            audioSource.PlayOneShot(mainEngine);
+        }
 
-        //Will tell audio/particle effects to start here if given enough time
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -96,12 +105,16 @@ public class Rocket : MonoBehaviour
     {
         // todo stop effects from happening
         isTransitioning = true;
+        audioSource.Stop();
+        audioSource.PlayOneShot(dying);
         Invoke("LoadFirstLevel" , levelLoadDelay);
     }
 
     private void StartEndSequence()
     {
         // todo add effects for ending level
+        audioSource.Stop();
+        audioSource.PlayOneShot(endLevel);
         isTransitioning = true;
         Invoke("LoadNextLevel" , levelLoadDelay);
     }
@@ -113,6 +126,13 @@ public class Rocket : MonoBehaviour
 
     private void LoadNextLevel()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+        int nextSceneIndex = currentSceneIndex + 1;
+        if(nextSceneIndex == SceneManager.sceneCountInBuildSettings)
+        {
+            //Loops back to beginning
+            nextSceneIndex = 0;
+        }
+        SceneManager.LoadScene(nextSceneIndex);
     }
 }
